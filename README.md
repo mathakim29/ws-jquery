@@ -1,89 +1,62 @@
 # jQuery WebSocket Wrapper
-
 A simple jQuery plugin to create and manage WebSocket connections with automatic reconnect and JSON support.
 
 ---
 
-## Usage
+## Installation
+To use the jQuery WebSocket wrapper via CDN, include the following in your HTML:
 
+```html
+<!-- jQuery (required) -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<!-- WebSocket Wrapper (replace with actual CDN URL) -->
+<script src="https://github.com/mathakim29/ws-jquery/blob/main/ws-jquery.min.js"></script>
+```
+
+Once included, you can use the wrapper like this:
+
+```js
+const ws = $("ws://localhost:8000/ws")
+  .on("open", () => console.log("Connected"))
+  .on("message", msg => console.log("Received:", msg))
+  .on("close", () => console.log("Disconnected"));
+
+ws.send({ type: "hello" });
+```
+## Usage
 Create a WebSocket connection like this:
 
 ```js
 const ws = $("ws://example.com/socket");
 ```
 
+##
 Send data (objects will be auto-serialized to JSON):
-
 ```js
 ws.send({ type: "hello", msg: "Hi!" });
 ```
 
-Listen for messages:
+
+## Message Queueing
+
+The `.send(data, priority)` method queues messages if the WebSocket connection isn’t open yet or is rate-limited.
+
+### Usage
 
 ```js
-ws.on("messageBatch", messages => {
-  messages.forEach(msg => console.log("Received:", msg));
-});
-```
+ws.send({ type: "update", payload: 123 });
+````
 
-Listen for connection open/close:
+* `data` can be any JSON-serializable object, string, or binary data (`ArrayBuffer`, `Blob`).
+* Messages are automatically JSON-stringified before sending.
+* If the socket is not open, messages are stored in an internal queue.
+* Queued messages are sent automatically once the connection opens.
+* Supports optional `priority` argument (`"normal"` by default, or `"high"`) to prioritize important messages.
 
-```js
-ws.on("open", () => console.log("Connected"));
-ws.on("close", () => console.log("Disconnected"));
-```
-
-Close the connection manually:
+### Example
 
 ```js
-ws.close();
-```
-
----
-
-## Features
-
-* Auto reconnect on disconnect
-* JSON serialization/deserialization by default
-* Message batching to reduce event spam
-* Simple jQuery event interface (`on`, `off`, `once`)
-
----
-
-## Methods
-
-* `.send(data, priority)` — Send data, optional priority `"normal"` (default) or `"high"`
-* `.close()` — Close the connection
-* `.isOpen()` — Returns if the connection is open
-
----
-
-## Events
-
-* `"open"` — Connection opened
-* `"close"` — Connection closed
-* `"messageBatch"` — Array of received messages
-* `"error"` — Errors during connection or send
-
----
-
-## Example
-
-```js
-const ws = $("ws://example.com/socket");
-
-ws.on("open", () => console.log("Connected"));
-// Output: Connected
-
-ws.on("messageBatch", msgs => {
-  msgs.forEach(msg => console.log("Received:", msg));
-  /*
-    Output examples:
-    Received: { type: "greeting", text: "Hello from server" }
-    Received: { type: "update", data: {...} }
-  */
-});
-
-ws.send({ hello: "world" });
-// Sends: '{"hello":"world"}'
+ws.send({ action: "start" }, "high");  // High-priority message
+ws.send({ action: "log", info: "debug" }); // Normal priority (default)
 ```
