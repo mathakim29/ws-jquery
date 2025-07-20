@@ -31,7 +31,7 @@ Create a WebSocket connection like this:
 const ws = $("ws://example.com/socket");
 ```
 
-##
+## Auto-JSON serialization
 Send data (objects will be auto-serialized to JSON):
 ```js
 ws.send({ type: "hello", msg: "Hi!" });
@@ -39,11 +39,9 @@ ws.send({ type: "hello", msg: "Hi!" });
 
 
 ## Message Queueing
-
 The `.send(data, priority)` method queues messages if the WebSocket connection isn’t open yet or is rate-limited.
 
 ### Usage
-
 ```js
 ws.send({ type: "update", payload: 123 });
 ````
@@ -55,7 +53,6 @@ ws.send({ type: "update", payload: 123 });
 * Supports optional `priority` argument (`"normal"` by default, or `"high"`) to prioritize important messages.
 
 ### Example
-
 ```js
 ws.send({ action: "start" }, "high");  // High-priority message
 ws.send({ action: "log", info: "debug" }); // Normal priority (default)
